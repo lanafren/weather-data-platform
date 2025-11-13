@@ -137,7 +137,7 @@ def fetch_forecast_to_ndjson(**context):
     rounded_date = logical_date.replace(hour=hour, minute=0, second=0, microsecond=0)
     
     hour_str = f"{hour:02d}"  # Format as 2-digit hour
-    gcs_object = f"current_{ds_nodash}_{hour_str}.ndjson"
+    gcs_object = f"forecast_{ds_nodash}_{hour_str}.ndjson"
     
     # Use rounded_date for consistency
     fetched_at_iso = rounded_date.replace(tzinfo=timezone.utc).isoformat()
@@ -236,7 +236,12 @@ def upload_to_gcs(**context):
 
 def check_bq_current_exists(**context):
     """Check if current weather record already exists in BigQuery."""
-    fetched_at_iso = context["logical_date"].replace(tzinfo=timezone.utc).isoformat()
+    # Round to the nearest 4-hour interval
+    logical_date = context["logical_date"]
+    hour = (logical_date.hour // 4) * 4
+    rounded_date = logical_date.replace(hour=hour, minute=0, second=0, microsecond=0)
+    
+    fetched_at_iso = rounded_date.replace(tzinfo=timezone.utc).isoformat()
     source = 'openweathermap.current'
     
     exists = record_exists_in_bq(CURRENT_TABLE_ID, fetched_at_iso, source)
@@ -252,7 +257,11 @@ def check_bq_current_exists(**context):
 
 def check_bq_forecast_exists(**context):
     """Check if forecast weather record already exists in BigQuery."""
-    fetched_at_iso = context["logical_date"].replace(tzinfo=timezone.utc).isoformat()
+    # Round to the nearest 4-hour interval
+    logical_date = context["logical_date"]
+    hour = (logical_date.hour // 4) * 4
+    rounded_date = logical_date.replace(hour=hour, minute=0, second=0, microsecond=0)
+    fetched_at_iso = rounded_date.replace(tzinfo=timezone.utc).isoformat()
     source = 'openweathermap.forecast_single'
     
     exists = record_exists_in_bq(FORECAST_TABLE_ID, fetched_at_iso, source)
