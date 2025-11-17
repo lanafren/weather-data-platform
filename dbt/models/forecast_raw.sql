@@ -19,5 +19,6 @@ datetime(
     json_value(data, '$.rain.3h') is not null as is_raining,
     json_value(data, '$.snow.3h') is not null as is_snowing,
     fetched_at
+    
 
 from {{ source('raw', 'forecast_raw')}}
