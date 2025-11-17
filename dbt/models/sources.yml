@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: raw_data
+    database: de101-477411
+    schema: raw
+    tables:
+      - name: forecast_raw
+      - name: current_raw
