@@ -1,13 +1,13 @@
 import os
 import json
 from datetime import datetime, timedelta
-from airflow.utils import timezone
+from airflow.utils import timezone # type: ignore
 from airflow import DAG
 from airflow.operators.python import PythonOperator # type: ignore
 from google.cloud import storage
 from google.cloud import bigquery
-from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
-import requests
+from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator # type: ignore
+import requests # type: ignore
 
 # ─── ENV ─────────────────────────────────────────────────────────────
 PROJECT_ID = os.getenv('GCP_PROJECT_ID')
