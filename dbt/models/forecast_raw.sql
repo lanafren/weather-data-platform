@@ -18,7 +18,7 @@ datetime(
     cast(json_value(data, '$.snow.3h') as float64) as snow_3h_mm,
     json_value(data, '$.rain.3h') is not null as is_raining,
     json_value(data, '$.snow.3h') is not null as is_snowing,
-    fetched_at
+    fetched_at 
     
 
 from {{ source('raw', 'forecast_raw')}}
