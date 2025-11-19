@@ -1,14 +1,11 @@
 select
     datetime(
-    timestamp_seconds(cast(json_value(data, '$.dt') as int64)),
-    "Europe/Berlin") as record_time,
+    timestamp_seconds(cast(json_value(data, '$.dt') as int64))) as record_time_utc,
 
     datetime(
-    timestamp_seconds(cast(json_value(data, '$.sys.sunrise') as int64)),
-    'Europe/Berlin') as sunrise,
+    timestamp_seconds(cast(json_value(data, '$.sys.sunrise') as int64))) as sunrise_utc,
 
-    datetime(timestamp_seconds(cast(json_value(data, '$.sys.sunset') as int64)),
-    'Europe/Berlin') as sunset,
+    datetime(timestamp_seconds(cast(json_value(data, '$.sys.sunset') as int64))) as sunset_utc,
 
     cast(json_value(data, '$.main.temp') as float64) as temp,
     cast(json_value(data, '$.main.feels_like') as float64) as feels_like,
@@ -23,7 +20,7 @@ select
     cast(json_value(data, '$.wind.gust') as float64) as wind_gust,
     cast(json_value(data, '$.rain.1h') as float64) as rain_1h_mm,
     cast(json_value(data, '$.snow.1h') as float64) as snow_1h_mm,
-    json_value(data, '$.rain.1h') is not null as is_raining,
-    json_value(data, '$.snow.1h') is not null as is_snowing,
+    (coalesce(cast(json_value(data, '$.rain.1h') as float64), 0) > 0) as is_raining,
+    (coalesce(cast(json_value(data, '$.snow.1h') as float64), 0) > 0) as is_snowing,
     fetched_at
 from {{ source("raw", "current_raw") }}

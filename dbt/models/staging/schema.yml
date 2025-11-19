@@ -1,0 +1,125 @@
+version: 2
+
+models:
+  - name: stg_current
+    description: "Cleaned and typed current weather data for Berlin."
+    columns:
+      - name: record_time
+        description: "Weather observation timestamp in UTC."
+        tests:
+          - not_null
+
+      - name: fetched_at
+        description: "Ingestion timestamp when the record was loaded."
+        tests:
+          - not_null
+
+      - name: sunrise
+        description: "Sunrise time (UTC)."
+
+      - name: sunset
+        description: "Sunset time (UTC)."
+
+      - name: temp
+        description: "Current temperature in °C."
+
+      - name: feels_like
+        description: "Feels-like temperature in °C."
+
+      - name: weather_main
+        description: "Main weather condition (e.g., Clear, Clouds)."
+
+      - name: weather_description
+        description: "Detailed weather description."
+
+      - name: pressure_hpa
+        description: "Atmospheric pressure in hPa."
+
+      - name: humidity
+        description: "Relative humidity in %."
+
+      - name: visibility_m
+        description: "Visibility in meters."
+
+      - name: clouds_pct
+        description: "Cloudiness percentage."
+
+      - name: wind_speed
+        description: "Wind speed in m/s."
+
+      - name: wind_deg
+        description: "Wind direction in degrees."
+
+      - name: wind_gust
+        description: "Wind gust in m/s."
+
+      - name: rain_1h_mm
+        description: "Rain volume for the last 1 hour (mm)."
+
+      - name: snow_1h_mm
+        description: "Snow volume for the last 1 hour (mm)."
+
+      - name: is_raining
+        description: "Boolean flag indicating rain."
+
+      - name: is_snowing
+        description: "Boolean flag indicating snow."
+
+
+  - name: stg_forecast
+    description: "Cleaned and typed 3-hour forecast weather data for Berlin."
+    columns:
+      - name: record_time
+        description: "Forecasted timestamp in UTC."
+        tests:
+          - not_null
+
+      - name: fetched_at
+        description: "Ingestion timestamp when the record was loaded."
+        tests:
+          - not_null
+
+      - name: temp
+        description: "Forecasted temperature in °C."
+
+      - name: feels_like
+        description: "Forecasted feels-like temperature in °C."
+
+      - name: weather_main
+        description: "Main weather condition."
+
+      - name: weather_description
+        description: "Detailed weather description."
+
+      - name: pressure_hpa
+        description: "Forecasted atmospheric pressure in hPa."
+
+      - name: humidity
+        description: "Forecasted humidity in %."
+
+      - name: visibility_m
+        description: "Forecasted visibility in meters."
+
+      - name: clouds_pct
+        description: "Cloudiness percentage."
+
+      - name: wind_speed
+        description: "Wind speed in m/s."
+
+      - name: wind_deg
+        description: "Wind direction in degrees."
+
+      - name: wind_gust
+        description: "Wind gust in m/s."
+
+      - name: rain_3h_mm
+        description: "Rain volume for the 3-hour forecast window (mm)."
+
+      - name: snow_3h_mm
+        description: "Snow volume for the 3-hour forecast window (mm)."
+
+      - name: is_raining
+        description: "Boolean flag indicating rain forecast."
+
+      - name: is_snowing
+        description: "Boolean flag indicating snow forecast."
