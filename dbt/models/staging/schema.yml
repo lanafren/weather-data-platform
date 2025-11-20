@@ -82,6 +82,7 @@ models:
     meta:
 
       data_source: "OpenWeatherMap API - 5 Day Forecast"
+      
     
     columns:
       - name: record_time_utc
