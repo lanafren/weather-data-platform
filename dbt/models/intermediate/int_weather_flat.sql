@@ -1,10 +1,10 @@
 with
     current_flat as (
         select
-            record_time,
+            record_time_utc,
             'current' as record_type,
-            sunrise,
-            sunset,
+            sunrise_utc,
+            sunset_utc,
             temp,
             feels_like,
             weather_main,
@@ -26,7 +26,7 @@ with
 
     forecast_flat as (
         select
-            record_time,
+            record_time_utc,
             'forecast' as record_type,
             cast(null as datetime) as sunrise,
             cast(null as datetime) as sunset,

@@ -5,7 +5,7 @@ models:
     description: "Intermediate flattened weather fact table for Berlin with hourly observations and weather metrics."
     columns:
 
-      - name: record_time
+      - name: record_time_utc
         description: "Timestamp of the weather observation."
         tests:
           - not_null
@@ -15,10 +15,10 @@ models:
         tests:
           - not_null
 
-      - name: sunrise
+      - name: sunrise_utc
         description: "Sunrise time for Berlin."
 
-      - name: sunset
+      - name: sunset_utc
         description: "Sunset time for Berlin."
 
       - name: temp
@@ -64,7 +64,7 @@ models:
 
       - name: is_snowing
         description: "Boolean flag indicating if it is snowing."
-        
+
       - name: fetched_at
         description: "Timestamp when this record was fetched from source."
         tests:

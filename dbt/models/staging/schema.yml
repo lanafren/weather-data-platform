@@ -4,7 +4,7 @@ models:
   - name: stg_current
     description: "Cleaned and typed current weather data for Berlin."
     columns:
-      - name: record_time
+      - name: record_time_utc
         description: "Weather observation timestamp in UTC."
         tests:
           - not_null
@@ -14,10 +14,10 @@ models:
         tests:
           - not_null
 
-      - name: sunrise
+      - name: sunrise_utc
         description: "Sunrise time (UTC)."
 
-      - name: sunset
+      - name: sunset)utc
         description: "Sunset time (UTC)."
 
       - name: temp
@@ -69,7 +69,7 @@ models:
   - name: stg_forecast
     description: "Cleaned and typed 3-hour forecast weather data for Berlin."
     columns:
-      - name: record_time
+      - name: record_time_utc
         description: "Forecasted timestamp in UTC."
         tests:
           - not_null
