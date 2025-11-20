@@ -130,11 +130,11 @@ This repository covers:
 * GCS/BigQuery raw layers
 * dbt project setup
 * staging models + schema tests
-* intermediate models
+* intermediate model
+* unified weather record
 
 **In progress:**
 
-* unified weather record
 * marts (fact/dim)
 
 **Planned:**
