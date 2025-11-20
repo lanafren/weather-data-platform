@@ -57,4 +57,4 @@ with
         select *
         from forecast_flat
     )
-order by record_time, record_type
+order by record_time_utc, record_type
