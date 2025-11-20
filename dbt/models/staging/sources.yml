@@ -4,6 +4,11 @@ sources:
   - name: raw
     database: de101-477411
     schema: raw
+    
+    freshness:
+      warn_after: {count: 5, period: hour} 
+      error_after: {count: 8, period: hour}  
+    
     tables:
       - name: forecast_raw
       - name: current_raw

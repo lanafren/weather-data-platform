@@ -1,71 +1,97 @@
 version: 2
 
 models:
-  - name: int_weather_flat
-    description: "Intermediate flattened weather fact table for Berlin with hourly observations and weather metrics."
+  - name: int_weather_unified
+    description: >
+      Intermediate unified weather data combining current observations and 
+      forecast predictions for Berlin. Combines hourly records from both 
+      sources with standardized column names and data types.
+    meta:
+      owner: "analytics_team"
+      data_source: "OpenWeatherMap API"
+    
     columns:
-
       - name: record_time_utc
-        description: "Timestamp of the weather observation."
+        description: "UTC timestamp of the weather observation or forecast."
         tests:
           - not_null
 
       - name: record_type
-        description: "Type of record, currently 'current'."
+        description: "Record source: 'current' for observed weather, 'forecast' for predictions."
         tests:
           - not_null
+          - accepted_values:
+              values: ['current', 'forecast']
 
       - name: sunrise_utc
-        description: "Sunrise time for Berlin."
+        description: "Sunrise time in UTC. Only populated for current records, null for forecasts."
 
       - name: sunset_utc
-        description: "Sunset time for Berlin."
+        description: "Sunset time in UTC. Only populated for current records, null for forecasts."
 
       - name: temp
-        description: "Observed temperature in Celsius."
+        description: "Temperature in degrees Celsius (°C)."
 
       - name: feels_like
-        description: "Perceived temperature in Celsius."
+        description: "Perceived temperature accounting for wind chill and humidity, in degrees Celsius (°C)."
 
       - name: weather_main
-        description: "Main weather condition (e.g., Clear, Rain, Snow)."
-
-      - name: weather_description
-        description: "Detailed weather description."
-
-      - name: pressure_hpa
-        description: "Atmospheric pressure in hPa."
-
-      - name: humidity
-        description: "Humidity percentage."
-
-      - name: visibility_m
-        description: "Visibility in meters."
-
-      - name: clouds_pct
-        description: "Cloud coverage percentage."
-
-      - name: wind_speed
-        description: "Wind speed in m/s."
-
-      - name: wind_deg
-        description: "Wind direction in degrees."
-      - name: wind_gust
-        description: "Wind gust speed in m/s."
-
-      - name: rain_mm
-        description: "Rain volume in last 1 hour in mm."
-
-      - name: snow_mm
-        description: "Snow volume in last 1 hour in mm."
-
-      - name: is_raining
-        description: "Boolean flag indicating if it is raining."
-
-      - name: is_snowing
-        description: "Boolean flag indicating if it is snowing."
-
-      - name: fetched_at
-        description: "Timestamp when this record was fetched from source."
+        description: "Primary weather condition category (e.g., Clear, Clouds, Rain, Snow)."
         tests:
           - not_null
+
+      - name: weather_description
+        description: "Detailed weather condition description (e.g., 'light rain', 'broken clouds')."
+
+      - name: pressure_hpa
+        description: "Atmospheric pressure at sea level in hectopascals (hPa)."
+
+      - name: humidity
+        description: "Relative humidity percentage (0-100%)."
+
+      - name: visibility_m
+        description: "Horizontal visibility distance in meters (m). Maximum value is typically 10000m."
+
+      - name: clouds_pct
+        description: "Cloud coverage as percentage of sky (0-100%)."
+
+      - name: wind_speed
+        description: "Wind speed in meters per second (m/s)."
+
+      - name: wind_deg
+        description: "Wind direction in meteorological degrees (0-360°). 0° = North, 90° = East, 180° = South, 270° = West."
+
+      - name: wind_gust
+        description: "Wind gust speed in meters per second (m/s). Null when no gusts recorded."
+
+      - name: rain_mm
+        description: >
+          Precipitation volume in millimeters (mm). 
+          For current records: 1-hour accumulation.
+          For forecast records: 3-hour accumulation.
+          Null when no rain detected.
+
+      - name: snow_mm
+        description: >
+          Snow volume in millimeters (mm).
+          For current records: 1-hour accumulation.
+          For forecast records: 3-hour accumulation.
+          Null when no snow detected.
+
+      - name: is_raining
+        description: "Boolean flag: true if rain is occurring/forecasted, false otherwise."
+        tests:
+          - not_null
+
+      - name: is_snowing
+        description: "Boolean flag: true if snow is occurring/forecasted, false otherwise."
+        tests:
+          - not_null
+
+      - name: fetched_at
+        description: "UTC timestamp when this data was fetched from the OpenWeatherMap API."
+        tests:
+          - not_null
+
+      - name: loaded_at
+        description: "UTC timestamp when this record was loaded into the data warehouse by dbt."
