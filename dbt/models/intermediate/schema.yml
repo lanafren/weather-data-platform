@@ -3,13 +3,7 @@ version: 2
 models:
   - name: int_weather_unified
     description: >
-      Intermediate unified weather data combining current observations and 
-      forecast predictions for Berlin. Combines hourly records from both 
-      sources with standardized column names and data types.
-    meta:
-      owner: "analytics_team"
-      data_source: "OpenWeatherMap API"
-    
+      Intermediate unified weather data combining current observations and  forecast predictions for Berlin. Combines hourly records from both  sources with standardized column names and data types.
     columns:
       - name: record_time_utc
         description: "UTC timestamp of the weather observation or forecast."
@@ -67,8 +61,7 @@ models:
 
       - name: rain_mm
         description: >
-          Precipitation volume in millimeters (mm). 
-          For current records: 1-hour accumulation.
+          Precipitation volume in millimeters (mm).  For current records: 1-hour accumulation.
           For forecast records: 3-hour accumulation.
           Null when no rain detected.
 
@@ -96,3 +89,6 @@ models:
 
       - name: loaded_at
         description: "UTC timestamp when this record was loaded into the data warehouse by dbt."
+    config:
+      meta:
+        data_source: "OpenWeatherMap API"

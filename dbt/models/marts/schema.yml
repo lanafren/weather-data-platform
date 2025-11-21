@@ -1,0 +1,161 @@
+version: 2
+
+models:
+  - name: dim_datetime
+    description: "Date and time dimension for weather records"
+    columns:
+      - name: datetime_key
+        description: "Primary key in format YYYYMMDDHHMM"
+        tests:
+          - unique
+          - not_null
+
+      - name: date
+        tests:
+          - not_null
+
+      - name: year
+        tests:
+          - not_null
+
+      - name: month
+        tests:
+          - not_null
+
+      - name: day
+        tests:
+          - not_null
+
+      - name: day_of_week
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                [
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday",
+                  "Sunday",
+                ]
+
+      - name: week_of_year
+        tests:
+          - not_null
+
+      - name: day_of_year
+        tests:
+          - not_null
+
+      - name: is_weekend
+        tests:
+          - not_null
+
+      - name: hour
+        tests:
+          - not_null
+
+  - name: dim_weather_condition
+    description: "Weather condition dimension"
+    columns:
+      - name: weather_condition_key
+        description: "Primary key - hash of weather_main and weather_description"
+        tests:
+          - unique
+          - not_null
+
+      - name: weather_main
+        description: "Main weather category (e.g., Clear, Clouds, Rain)"
+        tests:
+          - not_null
+
+      - name: weather_description
+        description: "Detailed weather description"
+        tests:
+          - not_null
+
+  - name: fact_weather
+    description: "Weather measurements fact table"
+    columns:
+      - name: record_time_utc
+        description: "Timestamp of the weather record"
+        tests:
+          - not_null
+      
+      - name: record_type
+        description: "Type of record: current or forecast"
+        tests:
+          - not_null
+
+      - name: datetime_key
+        description: "Foreign key to dim_datetime"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_datetime')
+              field: datetime_key
+      
+      - name: weather_condition_key
+        description: "Foreign key to dim_weather_condition"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_weather_condition')
+              field: weather_condition_key
+
+      - name: temp
+        description: "Temperature in Celsius"
+        tests:
+          - not_null
+      
+      - name: feels_like
+        description: "Feels-like temperature in Celsius"
+        tests:
+          - not_null
+     
+      - name: pressure_hpa
+        description: "Atmospheric pressure in hPa"
+      
+      - name: humidity
+        description: "Humidity percentage"
+        tests:
+          - not_null
+      
+      - name: clouds_pct
+        description: "Cloud coverage percentage"
+      
+      - name: wind_speed
+        description: "Wind speed in m/s"
+      
+      - name: wind_deg
+        description: "Wind direction in degrees"
+      
+      - name: wind_gust
+        description: "Wind gust speed in m/s"
+      
+      - name: rain_mm
+        description: "Rain volume in mm"
+      
+      - name: snow_mm
+        description: "Snow volume in mm"
+     
+      - name: is_raining
+
+      - name: is_snowing
+
+      - name: fetched_at
+        description: "When the data was fetched from API"
+        tests:
+          - not_null
+      
+      - name: loaded_at
+        description: "When the data was loaded into this table"
+        tests:
+          - not_null
+
+    tests:
+      # Composite primary key uniqueness test (native dbt)
+      - unique:
+          column_name: "concat(cast(record_time_utc as string), '-', record_type)"
