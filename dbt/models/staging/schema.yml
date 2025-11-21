@@ -2,124 +2,148 @@ version: 2
 
 models:
   - name: stg_current
-    description: "Cleaned and typed current weather data for Berlin."
+    description: "Cleaned and typed current weather observations for Berlin from OpenWeatherMap API."
+    meta:
+      data_source: "OpenWeatherMap API - Current Weather"
+    
     columns:
-      - name: record_time
+      - name: record_time_utc
         description: "Weather observation timestamp in UTC."
         tests:
           - not_null
 
       - name: fetched_at
-        description: "Ingestion timestamp when the record was loaded."
+        description: "Timestamp when the record was fetched from API."
         tests:
           - not_null
 
-      - name: sunrise
-        description: "Sunrise time (UTC)."
+      - name: sunrise_utc
+        description: "Sunrise time in UTC."
 
-      - name: sunset
-        description: "Sunset time (UTC)."
+      - name: sunset_utc  # Fixed typo
+        description: "Sunset time in UTC."
 
       - name: temp
-        description: "Current temperature in °C."
+        description: "Temperature in °C."
+        tests:
+          - not_null
 
       - name: feels_like
         description: "Feels-like temperature in °C."
 
       - name: weather_main
-        description: "Main weather condition (e.g., Clear, Clouds)."
+        description: "Main weather condition (e.g., Clear, Clouds, Rain, Snow)."
+        tests:
+          - not_null
 
       - name: weather_description
-        description: "Detailed weather description."
+        description: "Detailed weather description (e.g., 'light rain', 'broken clouds')."
 
       - name: pressure_hpa
         description: "Atmospheric pressure in hPa."
 
       - name: humidity
-        description: "Relative humidity in %."
+        description: "Relative humidity percentage."
 
       - name: visibility_m
-        description: "Visibility in meters."
+        description: "Visibility distance in meters."
 
       - name: clouds_pct
-        description: "Cloudiness percentage."
+        description: "Cloud coverage percentage."
 
       - name: wind_speed
         description: "Wind speed in m/s."
 
       - name: wind_deg
-        description: "Wind direction in degrees."
+        description: "Wind direction in meteorological degrees."
 
       - name: wind_gust
-        description: "Wind gust in m/s."
+        description: "Wind gust speed in m/s. Null when no gusts recorded."
 
       - name: rain_1h_mm
-        description: "Rain volume for the last 1 hour (mm)."
+        description: "Rain volume for the last 1 hour in mm. Null when no rain detected."
 
       - name: snow_1h_mm
-        description: "Snow volume for the last 1 hour (mm)."
+        description: "Snow volume for the last 1 hour in mm. Null when no snow detected."
 
       - name: is_raining
-        description: "Boolean flag indicating rain."
+        description: "Boolean flag indicating if rain is occurring."
+        tests:
+          - not_null
 
       - name: is_snowing
-        description: "Boolean flag indicating snow."
+        description: "Boolean flag indicating if snow is occurring."
+        tests:
+          - not_null
 
 
   - name: stg_forecast
-    description: "Cleaned and typed 3-hour forecast weather data for Berlin."
+    description: "Cleaned and typed 3-hour forecast weather data for Berlin from OpenWeatherMap API."
+    meta:
+
+      data_source: "OpenWeatherMap API - 5 Day Forecast"
+      
+    
     columns:
-      - name: record_time
-        description: "Forecasted timestamp in UTC."
+      - name: record_time_utc
+        description: "Forecasted weather timestamp in UTC."
         tests:
           - not_null
 
       - name: fetched_at
-        description: "Ingestion timestamp when the record was loaded."
+        description: "Timestamp when the forecast was fetched from API."
         tests:
           - not_null
 
       - name: temp
         description: "Forecasted temperature in °C."
+        tests:
+          - not_null
 
       - name: feels_like
         description: "Forecasted feels-like temperature in °C."
 
       - name: weather_main
-        description: "Main weather condition."
+        description: "Main forecasted weather condition."
+        tests:
+          - not_null
 
       - name: weather_description
-        description: "Detailed weather description."
+        description: "Detailed weather forecast description."
 
       - name: pressure_hpa
         description: "Forecasted atmospheric pressure in hPa."
 
       - name: humidity
-        description: "Forecasted humidity in %."
+        description: "Forecasted humidity percentage."
 
       - name: visibility_m
         description: "Forecasted visibility in meters."
 
       - name: clouds_pct
-        description: "Cloudiness percentage."
+        description: "Forecasted cloudiness percentage."
 
       - name: wind_speed
-        description: "Wind speed in m/s."
+        description: "Forecasted wind speed in m/s."
 
       - name: wind_deg
-        description: "Wind direction in degrees."
+        description: "Forecasted wind direction in degrees."
 
       - name: wind_gust
-        description: "Wind gust in m/s."
+        description: "Forecasted wind gust speed in m/s. Null when no gusts expected."
 
       - name: rain_3h_mm
-        description: "Rain volume for the 3-hour forecast window (mm)."
+        description: "Rain volume for the 3-hour forecast window in mm. Null when no rain forecasted."
 
       - name: snow_3h_mm
-        description: "Snow volume for the 3-hour forecast window (mm)."
+        description: "Snow volume for the 3-hour forecast window in mm. Null when no snow forecasted."
 
       - name: is_raining
-        description: "Boolean flag indicating rain forecast."
+        description: "Boolean flag indicating if rain is forecasted."
+        tests:
+          - not_null
 
       - name: is_snowing
-        description: "Boolean flag indicating snow forecast."
+        description: "Boolean flag indicating if snow is forecasted."
+        tests:
+          - not_null
