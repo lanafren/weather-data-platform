@@ -287,7 +287,9 @@ def conditional_bq_load_current(**context):
     print(f"Loading current weather data to BigQuery...")
     
     ds_nodash = context["ds_nodash"]
-    hour_str = context["logical_date"].strftime("%H")
+    logical_date = context["logical_date"]
+    hour = (logical_date.hour // 4) * 4
+    hour_str = f"{hour:02d}"
     gcs_object = f"current_{ds_nodash}_{hour_str}.ndjson"
     
     client = bigquery.Client(project=PROJECT_ID)
@@ -324,7 +326,10 @@ def conditional_bq_load_forecast(**context):
     print(f"Loading forecast weather data to BigQuery...")
     
     ds_nodash = context["ds_nodash"]
-    hour_str = context["logical_date"].strftime("%H")
+    # FIX: Use the same rounding logic as fetch tasks
+    logical_date = context["logical_date"]
+    hour = (logical_date.hour // 4) * 4
+    hour_str = f"{hour:02d}"
     gcs_object = f"forecast_{ds_nodash}_{hour_str}.ndjson"
     
     client = bigquery.Client(project=PROJECT_ID)
