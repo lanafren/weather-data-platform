@@ -132,9 +132,6 @@ This repository covers:
 * staging models + schema tests
 * intermediate model
 * unified weather record
-
-**In progress:**
-
 * marts (fact/dim)
 
 **Planned:**
