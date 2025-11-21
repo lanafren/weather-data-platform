@@ -3,9 +3,6 @@ version: 2
 models:
   - name: stg_current
     description: "Cleaned and typed current weather observations for Berlin from OpenWeatherMap API."
-    meta:
-      data_source: "OpenWeatherMap API - Current Weather"
-    
     columns:
       - name: record_time_utc
         description: "Weather observation timestamp in UTC."
@@ -77,13 +74,11 @@ models:
           - not_null
 
 
+    config:
+      meta:
+        data_source: "OpenWeatherMap API - Current Weather"
   - name: stg_forecast
     description: "Cleaned and typed 3-hour forecast weather data for Berlin from OpenWeatherMap API."
-    meta:
-
-      data_source: "OpenWeatherMap API - 5 Day Forecast"
-      
-    
     columns:
       - name: record_time_utc
         description: "Forecasted weather timestamp in UTC."
@@ -147,3 +142,6 @@ models:
         description: "Boolean flag indicating if snow is forecasted."
         tests:
           - not_null
+    config:
+      meta:
+        data_source: "OpenWeatherMap API - 5 Day Forecast"
