@@ -21,7 +21,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['current', 'forecast']
+              arguments:
+                values: ['current', 'forecast']
 
       - name: sunrise_utc
         description: "Sunrise time in UTC. Only populated for current records, null for forecasts."
