@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.operators.empty import EmptyOperator  # Fixed
-from airflow.utils.dates import days_ago
+from airflow.utils import timezone
 from airflow_dbt_python.operators.dbt import (DbtRunOperator, DbtTestOperator)
 from google.cloud import bigquery
 
@@ -68,7 +68,7 @@ with DAG(
     default_args=default_args,
     description='Run dbt after ingestion, only if new data exists',
     schedule='7 */4 * * *',
-    start_date=days_ago(1),
+    start_date=timezone.utcnow() - timedelta(days=1),
     catchup=False,
     max_active_runs=1,
     tags=['dbt', 'bigquery'],

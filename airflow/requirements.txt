@@ -1,3 +1,4 @@
+airflow-dbt-python==3.2.2
 apache-airflow-providers-google>=10.16.0
 apache-airflow-providers-http>=4.5.0
 google-cloud-storage>=2.14.0
