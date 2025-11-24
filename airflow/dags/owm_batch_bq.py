@@ -13,7 +13,7 @@ import requests # type: ignore
 PROJECT_ID = os.getenv('GCP_PROJECT_ID')
 REGION = os.getenv('GCP_REGION')
 BUCKET = os.getenv('GCS_BUCKET')
-BQ_DATASET = os.getenv('BQ_DATASET')
+BQ_DATASET = os.getenv('BQ_RAW_DATASET')
 API_KEY = os.getenv('OWM_API')
 LAT = os.getenv('BERLIN_LAT')
 LON = os.getenv('BERLIN_LON')

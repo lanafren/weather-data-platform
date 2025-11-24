@@ -1,0 +1,12 @@
+dbt_air:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: {{ env_var('GCP_PROJECT_ID') }}
+      dataset: {{ env_var('BQ_DBT_DATASET') }}
+      location: {{ env_var('GCP_REGION') }}
+      keyfile: {{ env_var('DBT_KEYFILE') }}
+      threads: 4
+      priority: interactive
