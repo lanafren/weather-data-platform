@@ -1,8 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from airflow import DAG
-from airflow.operators.python import PythonOperator
-from airflow.operators.branch import BranchPythonOperator
+from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.operators.empty import EmptyOperator  # Fixed
 from airflow.utils.dates import days_ago
 from airflow_dbt_python.operators.dbt import (DbtRunOperator, DbtTestOperator)
