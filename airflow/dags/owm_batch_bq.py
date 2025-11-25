@@ -11,7 +11,7 @@ from google.cloud import bigquery
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator # type: ignore
 import requests # type: ignore
 
-# ─── ENV ─────────────────────────────────────────────────────────────
+# ENV
 PROJECT_ID = os.getenv('GCP_PROJECT_ID')
 REGION = os.getenv('GCP_REGION')
 BUCKET = os.getenv('GCS_BUCKET')
@@ -21,7 +21,7 @@ LAT = os.getenv('BERLIN_LAT')
 LON = os.getenv('BERLIN_LON')
 EMAIL=os.getenv('EMAIL')
 
-# ─── CONST ───────────────────────────────────────────────────────────
+# CONSTANTS
 CURRENT_TABLE_ID = f"{PROJECT_ID}.{BQ_DATASET}.current_raw"
 FORECAST_TABLE_ID = f"{PROJECT_ID}.{BQ_DATASET}.forecast_raw"
 
@@ -35,7 +35,7 @@ default_args = {
 
 log = LoggingMixin().log
 
-# ─── VALIDATION ────────────────────────────────────────────────────────
+# VALIDATION
 def validate_forecast_record(r):
     """Ensure essential top-level keys exist in forecast record."""
     missing = [k for k in ["fetched_at", "source", "data"] if k not in r]
@@ -43,7 +43,7 @@ def validate_forecast_record(r):
         raise ValueError(f"Missing keys in forecast record: {missing}")
 
 
-# ─── HELPER FUNCTIONS ─────────────────────────────────────────────────
+# HELPER FUNCTIONS
 def file_exists_in_gcs(bucket_name, object_name):
     """Check if a file exists in GCS."""
     try:
@@ -83,7 +83,7 @@ def record_exists_in_bq(table_id, fetched_at_iso, source):
             return False
         return False
 
-# ─── TASKS ───────────────────────────────────────────────────────────
+# TASKS
 def fetch_current_to_ndjson(**context):
     """Fetch current weather data from OpenWeatherMap API and save as NDJSON."""
     ds_nodash = context["ds_nodash"]
