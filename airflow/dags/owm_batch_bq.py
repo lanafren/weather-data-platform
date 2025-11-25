@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 from airflow.utils import timezone # type: ignore
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.utils.log.logging_mixin import LoggingMixin # type: ignore
+from airflow.utils.log.logging_mixin import LoggingMixin 
+from airflow.utils.email import send_email# type: ignore
 from google.cloud import storage
 from google.cloud import bigquery
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator # type: ignore
@@ -18,6 +19,7 @@ BQ_DATASET = os.getenv('BQ_RAW_DATASET')
 API_KEY = os.getenv('OWM_API')
 LAT = os.getenv('BERLIN_LAT')
 LON = os.getenv('BERLIN_LON')
+EMAIL=os.getenv('EMAIL')
 
 # ─── CONST ───────────────────────────────────────────────────────────
 CURRENT_TABLE_ID = f"{PROJECT_ID}.{BQ_DATASET}.current_raw"
@@ -363,8 +365,26 @@ def conditional_bq_load_forecast(**context):
     log.info(f"Loaded data to {FORECAST_TABLE_ID}")
 
 def notify_sla_miss(dag, task_list, blocking_task_list, slas, blocking_tis):
+    """
+    Sends an email when a task SLA is missed.
+    """
     log = LoggingMixin().log
-    log.error(f"SLA missed for tasks: {', '.join([ti.task_id for ti in blocking_tis])}")
+    failed_tasks = [ti.task_id for ti in blocking_tis]
+    log.error(f"SLA missed for tasks: {', '.join(failed_tasks)}")
+
+    if EMAIL:  # make sure EMAIL is set in env
+        subject = f"[Airflow] SLA Missed in DAG: {dag.dag_id}"
+        body = f"""
+        The following tasks missed their SLA in DAG: {dag.dag_id} ({dag.start_date}):
+        {', '.join(failed_tasks)}
+
+        Check Airflow UI for details: {os.getenv('AIRFLOW__WEBSERVER__BASE_URL', 'http://localhost:8080')}
+        """
+        try:
+            send_email(to=EMAIL, subject=subject, html_content=body)
+            log.info(f"SLA notification sent to {EMAIL}")
+        except Exception as e:
+            log.error(f"Failed to send SLA email: {e}")
 
 
 # ─── DAG DEFINITION ──────────────────────────────────────────────────
