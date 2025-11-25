@@ -3,7 +3,8 @@ import json
 from datetime import datetime, timedelta
 from airflow.utils import timezone # type: ignore
 from airflow import DAG
-from airflow.operators.python import PythonOperator # type: ignore
+from airflow.operators.python import PythonOperator
+from airflow.utils.log.logging_mixin import LoggingMixin # type: ignore
 from google.cloud import storage
 from google.cloud import bigquery
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator # type: ignore
@@ -25,7 +26,12 @@ FORECAST_TABLE_ID = f"{PROJECT_ID}.{BQ_DATASET}.forecast_raw"
 default_args = {
     'owner': 'lana',
     'retries': 2,
+    'retry_delay': timedelta(minutes=5),
+    'retry_exponential_backoff': True,
+    'max_retry_delay': timedelta(minutes=30),
 }
+
+log = LoggingMixin().log
 
 # ─── VALIDATION ────────────────────────────────────────────────────────
 def validate_forecast_record(r):
@@ -44,10 +50,10 @@ def file_exists_in_gcs(bucket_name, object_name):
         blob = bucket.blob(object_name)
         exists = blob.exists()
         if exists:
-            print(f"File gs://{bucket_name}/{object_name} already exists in GCS")
+            log.info(f"File gs://{bucket_name}/{object_name} already exists in GCS")
         return exists
     except Exception as e:
-        print(f"Error checking GCS file existence: {e}")
+        log.info(f"Error checking GCS file existence: {e}")
         return False
 
 
@@ -65,16 +71,15 @@ def record_exists_in_bq(table_id, fetched_at_iso, source):
         count = next(result).count
         exists = count > 0
         if exists:
-            print(f"Record already exists in BigQuery table {table_id}")
+            log.info(f"Record already exists in BigQuery table {table_id}")
         return exists
     except Exception as e:
-        print(f"Error checking BigQuery record existence: {e}")
+        log.info(f"Error checking BigQuery record existence: {e}")
         # If table doesn't exist yet, that's fine - return False
         if "Not found: Table" in str(e):
-            print(f"📊 Table {table_id} doesn't exist yet, will be created on first load")
+            log.info(f"📊 Table {table_id} doesn't exist yet, will be created on first load")
             return False
         return False
-
 
 # ─── TASKS ───────────────────────────────────────────────────────────
 def fetch_current_to_ndjson(**context):
@@ -94,14 +99,14 @@ def fetch_current_to_ndjson(**context):
     
     # Check if file already exists in GCS
     if file_exists_in_gcs(BUCKET, gcs_object):
-        print(f"Skipping API fetch - file already exists")
+        log.info(f"Skipping API fetch - file already exists")
         ti = context['ti']
         ti.xcom_push(key='skip_fetch', value=True)
         ti.xcom_push(key='gcs_object', value=gcs_object)
         return
     
     # Fetch from API
-    print(f"Fetching current weather data from API...")
+    log.info(f"Fetching current weather data from API...")
     url = "http://api.openweathermap.org/data/2.5/weather"
     params = {'lat': LAT, 'lon': LON, 'appid': API_KEY, 'units': 'metric'}
     response = requests.get(url, params=params, timeout=30)
@@ -124,7 +129,7 @@ def fetch_current_to_ndjson(**context):
     ti.xcom_push(key='local_path', value=local_path)
     ti.xcom_push(key='gcs_object', value=gcs_object)
     ti.xcom_push(key='skip_fetch', value=False)
-    print(f"Created local file: {local_path}")
+    log.info(f"Created local file: {local_path}")
 
 
 def fetch_forecast_to_ndjson(**context):
@@ -144,14 +149,14 @@ def fetch_forecast_to_ndjson(**context):
     
     # Check if file already exists in GCS
     if file_exists_in_gcs(BUCKET, gcs_object):
-        print(f"Skipping API fetch - file already exists")
+        log.info(f"Skipping API fetch - file already exists")
         ti = context['ti']
         ti.xcom_push(key='skip_fetch', value=True)
         ti.xcom_push(key='gcs_object', value=gcs_object)
         return
     
     # Fetch from API
-    print(f"Fetching forecast weather data from API...")
+    log.info(f"Fetching forecast weather data from API...")
     url = "https://api.openweathermap.org/data/2.5/forecast"
     params = {"lat": LAT, "lon": LON, "appid": API_KEY, "units": "metric"}
     r = requests.get(url, params=params, timeout=30)
@@ -189,7 +194,7 @@ def fetch_forecast_to_ndjson(**context):
     ti.xcom_push(key="local_path", value=local_path)
     ti.xcom_push(key="gcs_object", value=gcs_object)
     ti.xcom_push(key='skip_fetch', value=False)
-    print(f"✅ Created local file: {local_path}")
+    log.info(f"✅ Created local file: {local_path}")
 
 
 def upload_to_gcs(**context):
@@ -199,7 +204,7 @@ def upload_to_gcs(**context):
     def safe_xcom_pull(key, task_id):
         v = ti.xcom_pull(key=key, task_ids=task_id)
         if v is None:
-            print(f"⚠️ XCom key '{key}' missing from {task_id}")
+            log.info(f"⚠️ XCom key '{key}' missing from {task_id}")
         return v
 
     current_data = {
@@ -221,17 +226,17 @@ def upload_to_gcs(**context):
     if not current_data['skip_fetch'] and current_data['local_path']:
         blob = bucket.blob(current_data['gcs_object'])
         blob.upload_from_filename(current_data['local_path'])
-        print(f"Uploaded {current_data['local_path']} → gs://{BUCKET}/{current_data['gcs_object']}")
+        log.info(f"Uploaded {current_data['local_path']} → gs://{BUCKET}/{current_data['gcs_object']}")
     else:
-        print(f"Skipping upload for current weather - already exists in GCS")
+        log.info(f"Skipping upload for current weather - already exists in GCS")
 
     # Upload forecast if it was fetched
     if not forecast_data['skip_fetch'] and forecast_data['local_path']:
         blob = bucket.blob(forecast_data['gcs_object'])
         blob.upload_from_filename(forecast_data['local_path'])
-        print(f"Uploaded {forecast_data['local_path']} → gs://{BUCKET}/{forecast_data['gcs_object']}")
+        log.info(f"Uploaded {forecast_data['local_path']} → gs://{BUCKET}/{forecast_data['gcs_object']}")
     else:
-        print(f"Skipping upload for forecast - already exists in GCS")
+        log.info(f"Skipping upload for forecast - already exists in GCS")
 
 
 def check_bq_current_exists(**context):
@@ -250,9 +255,9 @@ def check_bq_current_exists(**context):
     ti.xcom_push(key='skip_bq_load', value=exists)
     
     if exists:
-        print(f"Will skip BigQuery load - record already exists")
+        log.info(f"Will skip BigQuery load - record already exists")
     else:
-        print(f"Will proceed with BigQuery load")
+        log.info(f"Will proceed with BigQuery load")
 
 
 def check_bq_forecast_exists(**context):
@@ -270,9 +275,9 @@ def check_bq_forecast_exists(**context):
     ti.xcom_push(key='skip_bq_load', value=exists)
     
     if exists:
-        print(f"Will skip BigQuery load - record already exists")
+        log.info(f"Will skip BigQuery load - record already exists")
     else:
-        print(f"Will proceed with BigQuery load")
+        log.info(f"Will proceed with BigQuery load")
 
 
 def conditional_bq_load_current(**context):
@@ -281,10 +286,10 @@ def conditional_bq_load_current(**context):
     skip_load = ti.xcom_pull(key='skip_bq_load', task_ids='check_bq_current_exists')
     
     if skip_load:
-        print(f"Skipping BigQuery load - record already exists")
+        log.info(f"Skipping BigQuery load - record already exists")
         return
     
-    print(f"Loading current weather data to BigQuery...")
+    log.info(f"Loading current weather data to BigQuery...")
     
     ds_nodash = context["ds_nodash"]
     logical_date = context["logical_date"]
@@ -311,7 +316,7 @@ def conditional_bq_load_current(**context):
     uri = f"gs://{BUCKET}/{gcs_object}"
     load_job = client.load_table_from_uri(uri, CURRENT_TABLE_ID, job_config=job_config)
     load_job.result()  # Wait for job to complete
-    print(f"Loaded data to {CURRENT_TABLE_ID}")
+    log.info(f"Loaded data to {CURRENT_TABLE_ID}")
 
 
 def conditional_bq_load_forecast(**context):
@@ -320,10 +325,10 @@ def conditional_bq_load_forecast(**context):
     skip_load = ti.xcom_pull(key='skip_bq_load', task_ids='check_bq_forecast_exists')
     
     if skip_load:
-        print(f"Skipping BigQuery load - record already exists")
+        log.info(f"Skipping BigQuery load - record already exists")
         return
     
-    print(f"Loading forecast weather data to BigQuery...")
+    log.info(f"Loading forecast weather data to BigQuery...")
     
     ds_nodash = context["ds_nodash"]
     # FIX: Use the same rounding logic as fetch tasks
@@ -355,7 +360,11 @@ def conditional_bq_load_forecast(**context):
     uri = f"gs://{BUCKET}/{gcs_object}"
     load_job = client.load_table_from_uri(uri, FORECAST_TABLE_ID, job_config=job_config)
     load_job.result()  # Wait for job to complete
-    print(f"✅ Loaded data to {FORECAST_TABLE_ID}")
+    log.info(f"Loaded data to {FORECAST_TABLE_ID}")
+
+def notify_sla_miss(dag, task_list, blocking_task_list, slas, blocking_tis):
+    log = LoggingMixin().log
+    log.error(f"SLA missed for tasks: {', '.join([ti.task_id for ti in blocking_tis])}")
 
 
 # ─── DAG DEFINITION ──────────────────────────────────────────────────
@@ -367,41 +376,49 @@ with DAG(
     default_args=default_args,
     max_active_runs=1,
     tags=['owm', 'bigquery'],
+    sla_miss_callback=notify_sla_miss,
 ) as dag:
 
     fetch_current = PythonOperator(
         task_id='fetch_current_to_ndjson',
         python_callable=fetch_current_to_ndjson,
+        sla=timedelta(minutes=15)
     )
 
     fetch_forecast = PythonOperator(
         task_id='fetch_forecast_to_ndjson',
         python_callable=fetch_forecast_to_ndjson,
+        sla=timedelta(minutes=15)
     )
 
     upload_task = PythonOperator(
         task_id='upload_to_gcs',
         python_callable=upload_to_gcs,
+        sla=timedelta(minutes=15)
     )
 
     check_current_bq = PythonOperator(
         task_id='check_bq_current_exists',
         python_callable=check_bq_current_exists,
+        sla=timedelta(minutes=15)
     )
 
     check_forecast_bq = PythonOperator(
         task_id='check_bq_forecast_exists',
         python_callable=check_bq_forecast_exists,
+        sla=timedelta(minutes=15)
     )
 
     load_current_bq = PythonOperator(
         task_id='conditional_bq_load_current',
         python_callable=conditional_bq_load_current,
+        sla=timedelta(minutes=15)
     )
 
     load_forecast_bq = PythonOperator(
         task_id='conditional_bq_load_forecast',
         python_callable=conditional_bq_load_forecast,
+        sla=timedelta(minutes=15)
     )
 
     # Task dependencies
