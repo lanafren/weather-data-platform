@@ -30,8 +30,7 @@ models:
         tests:
           - not_null
           - accepted_values:
-              name: accepted_values
-              args:
+              arguments:
                 values:
                   [
                     "Monday",
@@ -96,8 +95,7 @@ models:
         tests:
           - not_null
           - relationships:
-              name: relationships
-              args:
+              arguments:
                 to: ref('dim_datetime')
                 field: datetime_key
       
@@ -106,8 +104,7 @@ models:
         tests:
           - not_null
           - relationships:
-              name: relationships
-              args:
+              arguments:
                 to: ref('dim_weather_condition')
                 field: weather_condition_key
 
