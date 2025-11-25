@@ -30,16 +30,18 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values:
-                [
-                  "Monday",
-                  "Tuesday",
-                  "Wednesday",
-                  "Thursday",
-                  "Friday",
-                  "Saturday",
-                  "Sunday",
-                ]
+              name: accepted_values
+              args:
+                values:
+                  [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                    "Sunday",
+                  ]
 
       - name: week_of_year
         tests:
@@ -94,16 +96,20 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('dim_datetime')
-              field: datetime_key
+              name: relationships
+              args:
+                to: ref('dim_datetime')
+                field: datetime_key
       
       - name: weather_condition_key
         description: "Foreign key to dim_weather_condition"
         tests:
           - not_null
           - relationships:
-              to: ref('dim_weather_condition')
-              field: weather_condition_key
+              name: relationships
+              args:
+                to: ref('dim_weather_condition')
+                field: weather_condition_key
 
       - name: temp
         description: "Temperature in Celsius"
@@ -156,6 +162,5 @@ models:
           - not_null
 
     tests:
-      # Composite primary key uniqueness test (native dbt)
       - unique:
           column_name: "concat(cast(record_time_utc as string), '-', record_type)"
