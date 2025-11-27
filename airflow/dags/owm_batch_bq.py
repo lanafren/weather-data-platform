@@ -5,7 +5,7 @@ from airflow.sdk import timezone # type: ignore
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator # type: ignore
 from airflow.utils.log.logging_mixin import LoggingMixin # type: ignore 
-from airflow.sdk.email import send_email# type: ignore
+from airflow.utils.email import send_email # type: ignore
 from google.cloud import storage
 from google.cloud import bigquery
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator # type: ignore
