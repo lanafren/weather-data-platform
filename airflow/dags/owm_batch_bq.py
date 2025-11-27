@@ -1,11 +1,11 @@
 import os
 import json
 from datetime import datetime, timedelta
-from airflow.utils import timezone # type: ignore
+from airflow.sdk import timezone # type: ignore
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from airflow.utils.log.logging_mixin import LoggingMixin 
-from airflow.utils.email import send_email# type: ignore
+from airflow.sdk.email import send_email# type: ignore
 from google.cloud import storage
 from google.cloud import bigquery
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator # type: ignore
