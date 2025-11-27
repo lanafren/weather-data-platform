@@ -1,13 +1,13 @@
 import os
 from airflow import DAG
-from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
-from airflow.providers.standard.operators.python import PythonOperator
-from airflow.exceptions import AirflowException
-from airflow.sdk import timezone
+from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator # type: ignore
+from airflow.providers.standard.operators.python import PythonOperator # type: ignore
+from airflow.exceptions import AirflowException # type: ignore
+from airflow.sdk import timezone # type: ignore
 from datetime import datetime, timedelta
 from google.cloud import bigquery
 import logging
-import pandas as pd
+import pandas as pd # type: ignore
 
 # Configuration
 PROJECT_ID = os.getenv('GCP_PROJECT_ID')
