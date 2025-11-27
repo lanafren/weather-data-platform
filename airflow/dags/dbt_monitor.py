@@ -1,9 +1,9 @@
 import os
 from airflow import DAG
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator # type: ignore
-from airflow.providers.standard.operators.python import PythonOperator # type: ignore
+from airflow.operators.python import PythonOperator # type: ignore
 from airflow.exceptions import AirflowException # type: ignore
-from airflow.sdk import timezone # type: ignore
+from airflow.utils import timezone # type: ignore
 from datetime import datetime, timedelta
 from google.cloud import bigquery
 import logging

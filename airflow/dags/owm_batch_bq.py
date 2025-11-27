@@ -1,9 +1,9 @@
 import os
 import json
 from datetime import datetime, timedelta
-from airflow.sdk import timezone # type: ignore
+from airflow.utils import timezone # type: ignore
 from airflow import DAG
-from airflow.providers.standard.operators.python import PythonOperator # type: ignore
+from airflow.operators.python import PythonOperator # type: ignore
 from airflow.utils.log.logging_mixin import LoggingMixin # type: ignore 
 from airflow.utils.email import send_email # type: ignore
 from google.cloud import storage
