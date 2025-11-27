@@ -19,6 +19,8 @@ dbt: stg → int → marts
    ↓
 BigQuery Clean (silver/gold)
    ↓
+Airflow (dbt post run checks)
+   ↓
 Looker
 ```
 
@@ -38,10 +40,17 @@ Looker
 ### **Airflow**
 
 * DAG: `owm_batch_bq.py`
-* Schedule: every 4 hours (`0 */4 * * *`)
+* Schedule: every 4 hours (`0 */4 * * *`) 
 * Retry logic enabled
 * Idempotent writes to GCS and BigQuery
 * Logical time aligned to 4-hour windows
+
+* DAG: `dbt_monitoring.py`
+* Schedule: every 4 hours at HH:30 (30 */4 * * *) — it starts 30 minutes after the ingestion DAG to ensure the full pipeline (ingestion → dbt) has finished.
+* Purpose: Post-dbt data quality checks (row counts, freshness, max timestamp validations)
+* Triggers: Runs according to its own schedule after dbt models are materialized
+* Alerts: Sends email on failure
+* Scope: Checks staging → intermediate → marts tables in BigQuery
 
 ---
 
@@ -84,22 +93,36 @@ Looker
 * **int** — unified structure for current + forecast data
 * **marts** — curated fact/dimension tables
 
-### **Tests**
+### **Standard Tests**
+   
+   * `unique`
+   * `not_null`
+   * `accepted_values`
+   * `relationships` (referential integrity)
+   
+### **Custom Tests**
+   
+   * `check_duplicates`
+   * `check_rain_snow_logic`
+   * `check_timestamps`
+   * `check_tmp_wind_range`
 
-* `unique`
-* `not_null`
-* `accepted_values`
-* `relationships` (referential integrity)
+* dbt job runs 15 minutes after ingestion DAG completion (scheduled at HH:16).
 
 ---
 
 ## **5. BigQuery Clean Layer**
 
-Planned curated outputs:
+* Dataset: `clean`
+* Tables:
 
-* `dim_time`
-* `fact_weather_measurements`
-* unified hourly/forecasted views
+  * staging layer (normalized raw data)
+  * intermediate layer (unified and enriched transformations)
+  * marts layer (analytics-ready dimensional + fact structures)
+  * metadata for data-quality monitoring
+
+* Materialization: stg + int → views, marts + metadata → tables
+* Staging, intermediate, and metadata views reside in the same clean dataset as marts to simplify process due to the small dataset size
 
 ---
 
@@ -117,7 +140,8 @@ This repository covers:
 * Ingestion pipeline design (Airflow → GCS → BigQuery)
 * Raw → staged → modeled ELT flow using dbt
 * Data modeling: grain definition, unified schema, typed fields
-* Quality controls: schema tests and referential checks
+* Quality controls: schema tests, referential checks, and custom validations
+* Monitoring: scheduled DAG for post-dbt data quality checks with alerts on failure
 * Secure execution with isolated service accounts
 
 ---
@@ -133,6 +157,7 @@ This repository covers:
 * intermediate model
 * unified weather record
 * marts (fact/dim)
+* Airflow dbt post run check
 
 **Planned:**
 
