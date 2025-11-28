@@ -21,16 +21,10 @@ TABLES_TO_CHECK = [
     'fact_weather'         # Final output - verify end result
 ]
 
-# Optional: Tables to check only row counts (no freshness checks)
-# dim_datetime grows with new timestamps from int_weather_unified
-TABLES_ROW_COUNT_ONLY = [
-    'dim_datetime'
-]
-
 default_args = {
-    'owner': 'data-engineering',
+    'owner': 'lana',
     'depends_on_past': False,
-    'email': ['your-email@example.com'],
+    'email': os.getenv('EMAIL'),
     'email_on_failure': True,
     'email_on_retry': False,
     'retries': 1,
