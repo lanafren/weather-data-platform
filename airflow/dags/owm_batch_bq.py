@@ -77,7 +77,7 @@ def record_exists_in_bq(table_id, fetched_at_iso, source):
         return exists
     except Exception as e:
         log.info(f"Error checking BigQuery record existence: {e}")
-        # If table doesn't exist yet, that's fine - return False
+        # If table doesn't exist yet, return False
         if "Not found: Table" in str(e):
             log.info(f"📊 Table {table_id} doesn't exist yet, will be created on first load")
             return False
@@ -317,7 +317,7 @@ def conditional_bq_load_current(**context):
     
     uri = f"gs://{BUCKET}/{gcs_object}"
     load_job = client.load_table_from_uri(uri, CURRENT_TABLE_ID, job_config=job_config)
-    load_job.result()  # Wait for job to complete
+    load_job.result()  
     log.info(f"Loaded data to {CURRENT_TABLE_ID}")
 
 
@@ -333,7 +333,6 @@ def conditional_bq_load_forecast(**context):
     log.info(f"Loading forecast weather data to BigQuery...")
     
     ds_nodash = context["ds_nodash"]
-    # FIX: Use the same rounding logic as fetch tasks
     logical_date = context["logical_date"]
     hour = (logical_date.hour // 4) * 4
     hour_str = f"{hour:02d}"
@@ -372,7 +371,7 @@ def notify_sla_miss(dag, task_list, blocking_task_list, slas, blocking_tis):
     failed_tasks = [ti.task_id for ti in blocking_tis]
     log.error(f"SLA missed for tasks: {', '.join(failed_tasks)}")
 
-    if EMAIL:  # make sure EMAIL is set in env
+    if EMAIL: 
         subject = f"[Airflow] SLA Missed in DAG: {dag.dag_id}"
         body = f"""
         The following tasks missed their SLA in DAG: {dag.dag_id} ({dag.start_date}):
