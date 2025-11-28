@@ -27,7 +27,7 @@ default_args = {
     'email': os.getenv('EMAIL'),
     'email_on_failure': True,
     'email_on_retry': False,
-    'retries': 1,
+    'retries': 2,
     'retry_delay': timedelta(minutes=5),
 }
 
@@ -45,9 +45,7 @@ def validate_checks(**context):
     """
     Validate data quality checks by comparing current metrics with previous run.
     Raises AirflowException if any check fails.
-    """
-    from google.cloud import bigquery
-    
+    """    
     client = bigquery.Client(project=PROJECT_ID)
     failures = []
     
@@ -98,10 +96,10 @@ def validate_checks(**context):
         if previous_max_ts and previous_max_ts.tzinfo is None:
             previous_max_ts = previous_max_ts.replace(tzinfo=timezone.utc)
         
-        # Check 1: Row count should not decrease (or decrease by more than 5%)
-        if current_count < previous_count * 0.95:
+        # Check 1: Row count should not decrease
+        if current_count < previous_count:
             failures.append(
-                f"❌ {table_name}: Row count decreased significantly "
+                f"❌ {table_name}: Row count decreased"
                 f"({previous_count} → {current_count}, "
                 f"{((current_count - previous_count) / previous_count * 100):.1f}%)"
             )
