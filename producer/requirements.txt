@@ -1,4 +1,3 @@
 google-cloud-pubsub
 requests
 google-cloud-bigquery==3.12.0
-python-dotenv
