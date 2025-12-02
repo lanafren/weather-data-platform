@@ -161,6 +161,6 @@ This repository covers:
 
 **Planned:**
 
-* streaming simulation (Pub/Sub + Cloud Run)
+* streaming simulation (Pub/Sub + Cloud Run): canceled due to free-tier limitations
 * Looker dashboard
 * CI/CD via GitHub Actions
